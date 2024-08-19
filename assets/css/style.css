@@ -451,7 +451,9 @@ section .container {
 .about-me .content p:last-child {
   margin-bottom: 0;
 }
- 
+ .about-me .row .image img{
+  border-radius: 10px;
+ }
 
 
 /*--------------------------------------------------------------
