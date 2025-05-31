@@ -251,4 +251,123 @@
    */
   new PureCounter();
 
+  // Intersection Observer for animations
+  const animateOnScroll = () => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.section-title h2, .about-me h3, .skills .progress, .resume .resume-item, .services .icon-box, .contact .info-box').forEach((element) => {
+      observer.observe(element);
+    });
+  };
+
+  // Form validation and submission
+  const handleFormSubmission = () => {
+    const form = document.getElementById('contactForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Basic validation
+      const inputs = form.querySelectorAll('input, textarea');
+      let isValid = true;
+      
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          input.classList.add('is-invalid');
+          isValid = false;
+        } else {
+          input.classList.remove('is-invalid');
+        }
+        
+        if (input.type === 'email' && !validateEmail(input.value)) {
+          input.classList.add('is-invalid');
+          isValid = false;
+        }
+      });
+
+      if (!isValid) return;
+
+      // Show loading state
+      const loadingDiv = form.querySelector('.loading');
+      const errorDiv = form.querySelector('.error-message');
+      const successDiv = form.querySelector('.sent-message');
+      
+      loadingDiv.style.display = 'block';
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+        
+        loadingDiv.style.display = 'none';
+        
+        if (response.ok) {
+          successDiv.style.display = 'block';
+          form.reset();
+        } else {
+          throw new Error(data.error || 'Form submission failed');
+        }
+      } catch (error) {
+        loadingDiv.style.display = 'none';
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+      }
+    });
+  };
+
+  // Email validation helper
+  const validateEmail = (email) => {
+    return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+  };
+
+  // Dark mode toggle
+  const initializeDarkMode = () => {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const toggleDarkMode = (e) => {
+      document.body.classList.toggle('dark-mode', e.matches);
+    };
+    
+    prefersDark.addListener(toggleDarkMode);
+    toggleDarkMode(prefersDark);
+  };
+
+  // Smooth scroll for navigation links
+  const initializeSmoothScroll = () => {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  };
+
+  // Initialize everything when DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    animateOnScroll();
+    handleFormSubmission();
+    initializeDarkMode();
+    initializeSmoothScroll();
+  });
+
 })()
